@@ -176,7 +176,26 @@ En lenguajes basados en prototipos, como JavaScript (en su modelo original) o Lu
 
 ## 6. ¿Dónde se almacenan en memoria los objetos? ¿Es igual en todos los lenguajes? ¿Qué es la **recolección de basura**? 
 
-### Respuesta
+### Respuesta  
+
+### 6.1. Almacenamiento de Objetos en Memoria
+
+En Java, todos los objetos se almacenan en el área de memoria dinámica conocida como **Heap** (montículo). Cuando se escribe `new Clase()`, el sistema realiza una operación equivalente a un `malloc` en C, buscando un bloque de memoria libre suficiente para alojar los atributos del objeto y devolviendo una referencia a esa dirección. Por otro lado, las variables que contienen esa referencia (los "nombres" de los objetos) se almacenan en la **Pila (Stack)**, comportándose exactamente igual que un puntero en C (`struct Tipo* puntero`).
+
+Es crucial entender esta distinción: la variable local es solo un puntero que vive brevemente en la pila mientras se ejecuta el método, pero el objeto al que apunta persiste en el Heap hasta que ya no se necesita. Si se asigna un objeto a otro (`obj1 = obj2`), no se copia el objeto entero (como pasaría al igualar dos `struct` en C), sino que simplemente se copia la dirección de memoria, haciendo que ambas variables apunten al mismo objeto físico en el Heap.
+
+### 6.2. Diferencias entre Lenguajes
+
+No todos los lenguajes siguen este modelo estricto. En C++, que es un lenguaje híbrido, se permite instanciar objetos tanto en la Pila (como una variable `struct` local en C) como en el Heap (usando `new`). Los objetos en la pila se destruyen automáticamente cuando la ejecución sale del bloque de código (scope), lo que ofrece un control muy preciso y determinista sobre la vida del objeto, similar a las variables locales en C.
+
+Por el contrario, lenguajes como Java, C# o Python fuerzan a que todos los objetos vivan en el Heap. Esta decisión de diseño simplifica el lenguaje al eliminar la distinción sintáctica entre acceder a un objeto estático (`.`) y uno dinámico (`->`) que existe en C y C++. En Java, siempre se utiliza la referencia, asumiendo que el acceso es indirecto, lo que facilita la programación a costa de abstraer el control de bajo nivel sobre la ubicación de memoria.
+
+### 6.3. La Recolección de Basura (Garbage Collection)
+
+La Recolección de Basura es un proceso automático que gestiona la liberación de memoria, solucionando uno de los problemas más frecuentes en C: las fugas de memoria (*memory leaks*) por olvidar llamar a `free()`. En Java, un proceso en segundo plano monitorea constantemente el Heap para identificar objetos que ya no son accesibles; es decir, objetos a los que no apunta ninguna variable o referencia activa en el programa.
+
+Cuando el Recolector de Basura detecta estos objetos "huérfanos", recupera automáticamente el espacio que ocupan, haciéndolo disponible para nuevas asignaciones. Esto significa que el programador no necesita (ni puede) destruir explícitamente los objetos. Aunque esto previene errores fatales y simplifica el desarrollo, introduce una pequeña sobrecarga de rendimiento y hace que el momento exacto de la liberación de memoria sea impredecible, a diferencia del control determinista que ofrece `free()` en C.
+
 
 
 ## 7. ¿Qué es un método? ¿Qué es la **sobrecarga de métodos**? 
@@ -292,44 +311,419 @@ public class Principal {
 
 ## 9. ¿Cuál es el punto de entrada en un programa en Java? ¿Qué es `static` y para qué vale? ¿Sólo se emplea para ese método `main`? ¿Para qué se combina con `final`?
 
-### Respuesta
+### Respuesta  
+
+### 9.1. El Punto de Entrada: `main`
+
+En Java, al igual que en C, la ejecución de un programa comienza por un método llamado `main`. Sin embargo, dada la naturaleza puramente orientada a objetos de Java, este método no puede existir de forma aislada o global; debe estar obligatoriamente encapsulado dentro de una clase. La firma estándar es `public static void main(String[] args)`.
+
+Este método recibe un array de cadenas de texto (`String[] args`), que es funcionalmente equivalente al `char *argv[]` de C, permitiendo capturar los argumentos de la línea de comandos. La diferencia principal es que en Java no se retorna un entero (`int`) al sistema operativo para indicar éxito o error (como el `return 0` en C), sino que el programa termina cuando finaliza el hilo de ejecución principal o se invoca explícitamente `System.exit()`.
+
+```java
+public class Principal {
+    // Punto de entrada estándar
+    public static void main(String[] args) {
+        System.out.println("Hola mundo");
+    }
+}
+
+```
+
+### 9.2. El significado de `static`
+
+La palabra clave `static` indica que un miembro (atributo o método) pertenece a la clase en sí misma y no a una instancia específica (objeto). En términos de C, un método `static` se comporta como una función global tradicional: no requiere que se haya creado una estructura ni un objeto con `new` para ser invocada. Por esta razón, el método `main` **debe** ser estático: la Máquina Virtual de Java (JVM) necesita poder llamarlo para iniciar el programa antes de que exista ningún objeto en memoria.
+
+Si un método no fuera `static`, sería necesario instanciar la clase para poder usarlo. Como el `main` es el primer código que se ejecuta, se produce la paradoja de "el huevo y la gallina": no se podría crear el objeto para llamar a `main` porque el código para crear el objeto estaría, precisamente, dentro de `main`. Al hacerlo estático, la JVM puede invocar `Principal.main()` directamente desde la definición de la clase, sin necesidad de reservar memoria para un objeto `Principal`.
+
+### 9.3. Uso de `static` más allá de `main`
+
+El modificador `static` no es exclusivo del `main`; se utiliza ampliamente para definir atributos y métodos compartidos. Un **atributo estático** funciona de manera similar a una variable global en C, pero restringida al ámbito de la clase ("namespace"). Existe una única copia de esa variable en memoria para todo el programa, independientemente de cuántos objetos se creen. Si un objeto modifica una variable estática, el cambio es visible para todos los demás objetos de esa clase.
+
+Por otro lado, los **métodos estáticos** se utilizan para crear funciones de utilidad que no dependen del estado de un objeto particular. Un ejemplo clásico es la clase `Math`. Al igual que en C se usa `<math.h>` y se llama a `sqrt()` sin asociarlo a ninguna estructura, en Java se llama a `Math.sqrt()` directamente. Estos métodos no pueden acceder a los atributos de instancia (no estáticos) porque no tienen un puntero `this` implícito.
+
+```java
+public class Utilidad {
+    // Variable compartida (similar a global)
+    static int contadorGlobal = 0;
+
+    // Método utilitario (similar a función pura de C)
+    static int sumar(int a, int b) {
+        return a + b;
+    }
+}
+
+```
+
+### 9.4. La combinación `static final` (Constantes)
+
+Cuando se combina `static` con el modificador `final`, se crea una constante de clase. El modificador `final` en Java indica que el valor de una variable no puede cambiar una vez asignado (inmutabilidad). Al añadirle `static`, se consigue que ese valor inmutable sea único y compartido para toda la aplicación, evitando tener una copia del mismo valor constante en cada objeto.
+
+Esta combinación es el reemplazo directo y seguro de las macros `#define` o de las variables `const` globales de C. Por convención, estas constantes se escriben en mayúsculas. Por ejemplo, `static final double PI = 3.1416;` permite usar `PI` en cualquier parte del código accediendo a través de la clase, garantizando que su valor es constante y eficiente en términos de memoria.
 
 ## 10. Intenta ejecutar un poco de Java de forma básica, con los comandos `javac` y `java`. ¿Cómo podemos compilar el programa y ejecutarlo desde linea de comandos? ¿Java es compilado? ¿Qué es la **máquina virtual**? ¿Qué es el *byte-code* y los ficheros `.class`?
 
-### Respuesta
+### Respuesta  
+
+### 10.1. Compilación y Ejecución desde la Línea de Comandos
+
+Para transformar el código fuente en un programa ejecutable, Java utiliza dos herramientas principales: `javac` (el compilador) y `java` (el lanzador de la aplicación). El proceso comienza con el comando `javac NombreArchivo.java`. Este paso es análogo a ejecutar `gcc -c` en C: verifica la sintaxis y genera un archivo binario intermedio, pero en lugar de código máquina nativo, genera un archivo con extensión `.class`.
+
+Una vez obtenido el archivo `.class`, el programa no se ejecuta directamente por el sistema operativo (como haría un `.exe` o `a.out` generado por C). En su lugar, se invoca el comando `java NombreClase` (sin la extensión). Este comando inicia el entorno de ejecución, carga la clase especificada y busca el método `main` estático para comenzar la ejecución. Es fundamental notar que mientras `javac` trabaja con archivos, `java` trabaja con **clases**.
+
+```bash
+# 1. Compilación: Genera el archivo 'HolaMundo.class'
+javac HolaMundo.java
+
+# 2. Ejecución: Arranca la JVM y ejecuta la clase
+java HolaMundo
+
+```
+
+### 10.2. Bytecode y Archivos `.class`
+
+Los archivos `.class` contienen lo que se conoce como **Bytecode**. El bytecode es un conjunto de instrucciones de bajo nivel, muy similar al lenguaje ensamblador, pero diseñado para un procesador abstracto en lugar de una CPU física específica (como x86 o ARM). En C, el compilador traduce el código fuente directamente a instrucciones específicas de la arquitectura del hardware (código máquina); si se cambia de sistema operativo o procesador, se debe recompilar el código fuente.
+
+En Java, el bytecode es universal y neutral respecto a la arquitectura. Esto significa que el mismo archivo `.class` generado en Windows puede ser llevado a Linux o macOS y ejecutarse sin necesidad de recompilación. El bytecode actúa como un "lenguaje máquina universal", desacoplando el desarrollo del software de la plataforma de hardware subyacente.
+
+### 10.3. La Máquina Virtual de Java (JVM)
+
+La **Máquina Virtual de Java (JVM)** es el componente de software encargado de interpretar y ejecutar el bytecode. Actúa como un intermediario entre el bytecode y el hardware real. Cuando se ejecuta el comando `java`, en realidad se está iniciando una instancia de la JVM, la cual funciona como una "computadora dentro de la computadora".
+
+Su función principal es cargar los archivos `.class` y traducir las instrucciones de bytecode a código máquina nativo del sistema anfitrión en tiempo de ejecución. Esto se realiza a menudo mediante una técnica llamada compilación JIT (Just-In-Time), que optimiza el rendimiento acercándolo al de C. Mientras que en C el sistema operativo gestiona directamente la memoria y el procesador, en Java la JVM abstrae estos recursos, proporcionando servicios como la Recolección de Basura y garantizando la seguridad de tipos, impidiendo accesos ilegales a memoria que serían posibles en C.
 
 
 ## 11. En el código anterior de la clase `Punto` ¿Qué es `new`? ¿Qué es un **constructor**? Pon un ejemplo de constructor en una clase `Empleado` que tenga DNI, nombre y apellidos
 
-### Respuesta
+### Respuesta  
+
+### 11.1. El operador `new`
+
+El operador `new` es la instrucción encargada de solicitar memoria al sistema para almacenar un nuevo objeto. En C, cuando se necesita memoria dinámica para una estructura, se utiliza la función `malloc()`, la cual devuelve un puntero genérico a un bloque de bytes vacíos en el *heap*. En Java, `new` realiza una función idéntica: reserva el espacio necesario en el *heap* para alojar todos los atributos de la clase y devuelve una **referencia** (un puntero gestionado) a esa ubicación de memoria.
+
+Sin embargo, `new` es más sofisticado que `malloc`. Mientras que `malloc` simplemente entrega memoria "cruda" (que puede contener basura si no se usa `calloc` o se inicializa manualmente), el operador `new` en Java garantiza que la memoria se limpie y, acto seguido, invoca automáticamente al **constructor** de la clase. Por lo tanto, `new` no solo reserva el espacio, sino que también asegura que el objeto se inicialice correctamente antes de devolver su referencia a la variable.
+
+### 11.2. El Constructor
+
+Un **constructor** es un bloque de código especial dentro de la clase que tiene como única función inicializar el objeto recién creado. Se reconoce fácilmente porque **tiene el mismo nombre que la clase** y, a diferencia de los métodos normales, **no devuelve ningún tipo de dato** (ni siquiera `void`). Su objetivo es establecer los valores iniciales de los atributos, asegurando que el objeto nazca con un estado válido y coherente.
+
+Si se compara con C, imaginemos que cada vez que se hace un `malloc` para una `struct`, fuera obligatorio llamar inmediatamente a una función `inicializar_struct()`. En C, esto depende de la disciplina del programador; si se olvida, la estructura puede tener datos corruptos. En Java, el constructor fuerza esta inicialización: es imposible crear un objeto con `new` sin que se ejecute un constructor. Si el programador no define ninguno, Java proporciona uno "por defecto" invisible que pone todos los números a cero y las referencias a `null`.
+
+### 11.3. Ejemplo: Clase `Empleado`
+
+A continuación se muestra la clase `Empleado` con un constructor que recibe parámetros. Se utiliza la palabra clave `this`, que es un puntero que hace referencia al "propio objeto" actual. Es equivalente a cuando en C una función recibe un puntero a la estructura (`struct Empleado *this`) para saber qué datos modificar. Aquí, `this.dni` se refiere al atributo del objeto, mientras que `dni` (sin `this`) se refiere al parámetro recibido en el constructor.
+
+```java
+public class Empleado {
+    // Atributos
+    String dni;
+    String nombre;
+    String apellidos;
+
+    // Constructor: Se llama igual que la clase y recibe parámetros
+    public Empleado(String dni, String nombre, String apellidos) {
+        // 'this' diferencia el atributo de la clase del parámetro del método
+        this.dni = dni;
+        this.nombre = nombre;
+        this.apellidos = apellidos;
+    }
+}
+
+// Ejemplo de uso en otra clase (Main)
+class Principal {
+    public static void main(String[] args) {
+        // Al usar 'new', estamos OBLIGADOS a pasar los 3 datos
+        // No se puede crear un empleado "vacío" si no existe un constructor vacío
+        Empleado e1 = new Empleado("12345678A", "Ana", "García");
+    }
+}
+
+```
 
 
 ## 12. ¿Qué es la referencia `this`? ¿Se llama igual en todos los lenguajes? Pon un ejemplo del uso de `this` en la clase `Punto`
 
-### Respuesta
+### Respuesta  
+
+### 12.1. Concepto y Funcionamiento
+
+La referencia `this` es una palabra clave que actúa como un puntero implícito al propio objeto que está ejecutando el código en ese momento. Para un programador de C, `this` es exactamente equivalente al puntero a la estructura que se suele pasar como primer argumento en las funciones que manipulan datos (por ejemplo, `void funcion(struct Estructura *ptr)`). En Java, este puntero no se declara en los parámetros del método, sino que existe automáticamente dentro de cualquier método no estático, permitiendo al objeto referirse a sus propios miembros (atributos y métodos).
+
+Su uso más frecuente y necesario ocurre cuando hay colisión de nombres, un fenómeno conocido como *shadowing* (ocultación). Si un parámetro de un método o constructor tiene el mismo nombre que un atributo de la clase, el parámetro tiene prioridad y "tapa" al atributo. En ese caso, `this` sirve para desambiguar: `x` se refiere al parámetro local, mientras que `this.x` accede explícitamente al atributo almacenado en la memoria del objeto (el *heap*).
+
+### 12.2. Nomenclatura en otros lenguajes
+
+Aunque el concepto de autorreferencia es universal en la Programación Orientada a Objetos, la palabra clave varía según el lenguaje. Los lenguajes con sintaxis derivada de C (como C++, C#, Java y JavaScript) utilizan mayoritariamente `this`. Sin embargo, otros lenguajes populares optan por términos diferentes. Python y Swift, por ejemplo, utilizan `self`, mientras que Visual Basic utiliza `Me`.
+
+Una diferencia técnica importante respecto a Python es la declaración explícita. En Python, es obligatorio escribir `self` como el primer parámetro de cada método (`def metodo(self, arg):`). En Java y C++, el paso de este puntero es transparente y gestionado por el compilador; solo se escribe `this` cuando se necesita resolver una ambigüedad o pasar el objeto actual como argumento a otro método, lo que limpia la firma de las funciones.
+
+### 12.3. Ejemplo en la clase `Punto`
+
+En el siguiente ejemplo se ha modificado el constructor de la clase `Punto`. Obsérvese cómo los argumentos del constructor se llaman `x` e `y`, coincidiendo con los nombres de los atributos. Sin el uso de `this`, la asignación `x = x` sería inocua (asignaría el parámetro a sí mismo) y los atributos del objeto quedarían sin inicializar.
+
+```java
+public class Punto {
+    double x;
+    double y;
+
+    // Constructor con parámetros que tienen EL MISMO NOMBRE que los atributos
+    public Punto(double x, double y) {
+        // ERROR: x = x; // Esto solo asigna el parámetro a sí mismo.
+        
+        // CORRECTO: Usamos 'this' para referirnos al atributo de la clase
+        this.x = x; 
+        this.y = y;
+    }
+
+    // Método para desplazar el punto actual sumando coordenadas
+    public void desplazar(double dx, double dy) {
+        // Aquí no es estrictamente necesario 'this' porque no hay ambigüedad,
+        // pero se puede usar para mayor claridad.
+        this.x += dx;
+        this.y += dy;
+    }
+}
+
+```
 
 
 ## 13. Añade ahora otro nuevo método que se llame `distanciaA`, que reciba un `Punto` como parámetro y calcule la distancia entre `this` y el punto proporcionado
 
-### Respuesta
+### Respuesta  
+
+### 13.1. Interacción entre objetos del mismo tipo
+
+En la programación estructurada en C, para calcular la distancia entre dos puntos, sería necesario definir una función que recibiera dos estructuras como argumentos: `double distancia(struct Punto p1, struct Punto p2)`. En la Programación Orientada a Objetos, la lógica cambia ligeramente: se le "pide" a un objeto (el sujeto) que calcule su distancia respecto a otro (el objeto pasado como parámetro). Por tanto, el método solo requiere un argumento, ya que el primer punto es el propio objeto que ejecuta el código (`this`).
+
+Dentro del método, se accede a las coordenadas del objeto actual mediante `this.x` y `this.y` (o simplemente `x` e `y` si no hay ambigüedad), y a las coordenadas del objeto externo utilizando la notación de punto sobre el parámetro: `otroPunto.x` y `otroPunto.y`. Es importante notar que, al estar dentro de la definición de la clase `Punto`, se tiene permiso para acceder a los atributos de cualquier objeto `Punto`, incluso si fueran privados, ya que el control de acceso es a nivel de clase, no de instancia.
+
+### 13.2. Implementación en Java
+
+El siguiente código muestra la clase actualizada. Se utiliza la fórmula matemática habitual de la distancia euclidiana .
+
+```java
+public class Punto {
+    double x;
+    double y;
+
+    // Constructor
+    public Punto(double x, double y) {
+        this.x = x;
+        this.y = y;
+    }
+
+    // Método que calcula la distancia entre 'this' y 'otroPunto'
+    public double distanciaA(Punto otroPunto) {
+        // 1. Calculamos la diferencia de coordenadas
+        // 'this.x' es mi coordenada, 'otroPunto.x' es la del argumento
+        double cateto1 = this.x - otroPunto.x;
+        double cateto2 = this.y - otroPunto.y;
+
+        // 2. Aplicamos Pitágoras (hipotenusa)
+        return Math.sqrt((cateto1 * cateto1) + (cateto2 * cateto2));
+    }
+}
+
+```
+
+```java
+// Ejemplo de uso
+public class Principal {
+    public static void main(String[] args) {
+        Punto p1 = new Punto(0, 0);
+        Punto p2 = new Punto(3, 4);
+
+        // Se lee: "p1, calcula tu distancia a p2"
+        double d = p1.distanciaA(p2); 
+        
+        System.out.println("Distancia: " + d); // Salida: 5.0
+    }
+}
+
+```
 
 
 ## 14. El paso del `Punto` como parámetro a un método, es **por copia** o **por referencia**, es decir, si se cambia el valor de algún atributo del punto pasado como parámetro, dichos cambios afectan al objeto fuera del método? ¿Qué ocurre si en vez de un `Punto`, se recibiese un entero (`int`) y dicho entero se modificase dentro de la función? 
 
-### Respuesta
+### Respuesta  
+
+### 14.1. Paso de Objetos: Valor de la Referencia
+
+En Java, técnicamente **todo se pasa por valor**, pero es crucial entender qué es ese "valor" en el caso de los objetos. Cuando se pasa un objeto (como `Punto`) a un método, no se copia el objeto entero (todos sus datos en el Heap), sino que se **copia la referencia** (la dirección de memoria). Para un programador de C, esto es exactamente equivalente a pasar un puntero a una función (`void funcion(struct Punto *p)`).
+
+Dado que el método recibe una copia de la dirección de memoria que apunta al objeto original, si dentro del método se modifican los atributos del objeto (por ejemplo, `p.x = 50;`), **esos cambios sí afectan al objeto fuera del método**. Esto ocurre porque tanto la variable original como el parámetro del método están "mirando" al mismo bloque de memoria física en el Heap. Sin embargo, si dentro del método se hiciera `p = new Punto(0,0)`, solo se cambiaría hacia dónde apunta la variable local del método, sin afectar a la referencia original externa.
+
+### 14.2. Paso de Primitivos: Copia del Dato
+
+Cuando se pasa un tipo primitivo (como `int`, `double`, `boolean`), el comportamiento es el de un **paso por valor** estricto y tradicional, idéntico al de C. Se crea una copia exacta del dato en la Pila (stack) para uso exclusivo del método. No existe ninguna conexión de memoria entre la variable original y el parámetro recibido.
+
+Por consiguiente, si se recibe un entero y se modifica dentro de la función (por ejemplo, `n = n + 1;`), este cambio es puramente local. La variable original que se pasó como argumento permanece inalterada una vez que el método termina su ejecución. En Java no existen los punteros explícitos a primitivos (como `int *` en C), por lo que no es posible modificar un `int` externo directamente dentro de un método mediante argumentos.
+
+### 14.3. Ejemplo demostrativo
+
+```java
+public class PruebaPaso {
+    
+    // Intenta modificar un primitivo (NO funcionará fuera)
+    static void intentarCambiarInt(int numero) {
+        numero = 999; 
+        // 'numero' ahora vale 999, pero solo aquí dentro
+    }
+
+    // Intenta modificar un objeto (SÍ funcionará fuera)
+    static void modificarPunto(Punto p) {
+        // Accedemos a la dirección de memoria y cambiamos el dato real
+        p.x = 100.0; 
+        p.y = 100.0;
+    }
+
+    public static void main(String[] args) {
+        int valor = 10;
+        Punto miPunto = new Punto(0, 0);
+
+        // 1. Prueba con Entero
+        intentarCambiarInt(valor);
+        System.out.println("Valor del int: " + valor); 
+        // Imprime 10 (Sin cambios)
+
+        // 2. Prueba con Objeto
+        modificarPunto(miPunto);
+        System.out.println("Valor del Punto: " + miPunto.x); 
+        // Imprime 100.0 (El objeto fue modificado)
+    }
+}
+
+```
 
 
 ## 15. ¿Qué es el método `toString()` en Java? ¿Existe en otros lenguajes? Pon un ejemplo de `toString()` en la clase `Punto` en Java
 
-### Respuesta
+### Respuesta  
+
+### 15.1. El método `toString()`
+
+El método `toString()` es un mecanismo fundamental en Java que permite obtener una representación en forma de texto (cadena de caracteres) de cualquier objeto. En C, para visualizar el contenido de una `struct`, el programador debe escribir manualmente una sentencia `printf` con los especificadores de formato adecuados para cada campo cada vez que quiera imprimirla, o bien crear una función específica como `imprimir_punto()`. En Java, se estandariza este comportamiento: se define dentro de la clase cómo debe convertirse el objeto a texto.
+
+Técnicamente, este método se hereda de la clase cósmica `Object`, que es la "clase padre" de todas las clases en Java. Por defecto, `toString()` devuelve una cadena técnica poco útil (el nombre de la clase seguido de una arroba y un código hash hexadecimal, similar a una dirección de memoria). Al **sobrescribir** (redefinir) este método en una clase propia, se permite que al pasar el objeto a `System.out.println()`, Java invoque automáticamente esta función para mostrar una descripción legible y formateada del estado del objeto.
+
+### 15.2. Presencia en otros lenguajes
+
+Este concepto es un estándar de facto en la mayoría de los lenguajes orientados a objetos modernos, aunque la nomenclatura varía. La necesidad de convertir estructuras de datos complejas a texto para depuración (logging) o visualización es universal.
+
+* En **Python**, existen dos métodos equivalentes: `__str__` (para una representación legible por el usuario final) y `__repr__` (para una representación técnica interna).
+* En **C#**, el método se llama `ToString()` (con mayúscula inicial), cumpliendo exactamente la misma función que en Java.
+* En **JavaScript**, también existe el método `toString()` en el prototipo de los objetos, invocándose automáticamente cuando se intenta concatenar un objeto con una cadena.
+
+### 15.3. Ejemplo en la clase `Punto`
+
+A continuación se implementa el método en la clase `Punto`. Nótese el uso de la etiqueta `@Override`, que indica al compilador que la intención es reemplazar el método base de Java. Al ejecutar el código, se observa que no es necesario llamar explícitamente a `.toString()`; la función `println` lo hace internamente al detectar que recibe un objeto.
+
+```java
+public class Punto {
+    double x;
+    double y;
+
+    public Punto(double x, double y) {
+        this.x = x;
+        this.y = y;
+    }
+
+    // Sobrescritura del método para devolver una cadena personalizada
+    @Override
+    public String toString() {
+        // Retornamos el formato "(x, y)"
+        // En C sería similar a preparar un buffer con sprintf
+        return "(" + this.x + ", " + this.y + ")";
+    }
+}
+
+// Ejemplo de uso
+public class Principal {
+    public static void main(String[] args) {
+        Punto p = new Punto(5, 10);
+
+        // Sin toString(), esto imprimiría algo como "Punto@15db9742"
+        // Con toString(), imprime automáticamente: "(5.0, 10.0)"
+        System.out.println(p); 
+        
+        // También funciona en concatenaciones
+        System.out.println("El punto detectado es " + p);
+    }
+}
+
+```
 
 
 ## 16. Reflexiona: ¿una clase es como un `struct` en C? ¿Qué le falta al `struct` para ser como una clase y las variables de ese tipo ser instancias?
 
+### Respuesta  
 
-### Respuesta
+### 1. Similitudes Estructurales
+
+Efectivamente, una clase en Java puede considerarse, en su nivel más básico, como un superconjunto de una `struct` en C. Ambas cumplen la función fundamental de **agregación de datos**: permiten definir un nuevo tipo de dato compuesto que agrupa variables de diferentes tipos bajo un mismo identificador. Si se eliminaran todos los métodos y se dejaran todos los atributos como públicos en una clase de Java, el resultado sería funcionalmente idéntico a una `struct` de C (un contenedor de datos pasivo).
+
+### 2. La Integración del Comportamiento
+
+La primera gran carencia de la `struct` para convertirse en clase es la **ausencia de métodos vinculados**. En C, los datos (la estructura) y la lógica (las funciones) viven en mundos separados; las funciones reciben estructuras, pero no forman parte de ellas. Para transformar una `struct` en una clase, es necesario mover las funciones al interior de la definición de la estructura. Esto cambia el paradigma: los datos dejan de ser algo pasivo que se pasa de un lado a otro, y se convierten en entidades activas responsables de sus propias operaciones.
+
+### 3. El Control de Acceso y Ciclo de Vida
+
+El segundo elemento ausente es la **seguridad y la autogestión**. Una `struct` en C es "transparente" y vulnerable; cualquier parte del código puede modificar sus campos sin restricciones, y su inicialización depende totalmente de la disciplina del programador. Para ser una clase, se requiere añadir **encapsulamiento** (poder ocultar datos con `private`) y **constructores**. Esto garantiza que la "instancia" no sea simplemente un bloque de memoria reservada (`malloc`), sino un objeto que nace con un estado válido garantizado y que protege su integridad interna contra modificaciones arbitrarias.
+
+### 4. Relaciones Jerárquicas
+
+Finalmente, a la `struct` le falta la capacidad de relacionarse jerárquicamente con otras estructuras. En C, las estructuras son islas independientes; no existe un mecanismo nativo para decir que una `struct Coche` *es un tipo de* `struct Vehiculo` y heredar sus campos automáticamente. Para alcanzar la categoría de clase, el sistema debe soportar **herencia y polimorfismo**, permitiendo extender y especializar el comportamiento de los tipos base sin reescribir código, algo que la estructura plana de C no permite por diseño.
+
 
 
 ## 17. Quitemos un poco de magia a todo esto: ¿Como se podría “emular”, con `struct` en C, la clase `Punto`, con su función para calcular la distancia al origen? ¿Qué ha pasado con `this`?
 
-### Respuesta
+### Respuesta  
+
+### 17.1. La Emulación: Estructura + Función Externa
+
+Para emular una clase en C, se debe separar la definición de los datos de la definición del comportamiento. Primero, se define un `struct Punto` que contenga las coordenadas `x` e `y`. Dado que C no permite escribir funciones dentro de la estructura, la función `calcularDistancia` debe escribirse fuera, en el ámbito global.
+
+La clave para vincular esa función con la estructura reside en los parámetros. La función no puede "adivinar" sobre qué punto debe operar, por lo que es obligatorio pasarle un puntero a la estructura `Punto` como argumento. De esta forma, la función recibe la dirección de memoria de los datos que debe procesar, accediendo a ellos mediante el operador flecha (`->`). Lo que en Java es una unidad indivisible (objeto), en C se convierte en dos piezas separadas que colaboran explícitamente.
+
+### 17.2. La revelación de `this`
+
+Al analizar la implementación en C, se descubre el "truco" de la referencia `this`. En el código de C que se muestra abajo, el primer parámetro de la función se ha llamado deliberadamente `this` (`Punto *this`). Este puntero cumple exactamente la misma función que la palabra clave `this` en Java: permite a la función saber cuál es la instancia concreta sobre la que está operando.
+
+En Java, el compilador oculta este primer parámetro para simplificar la sintaxis. Cuando se escribe `p.calcularDistancia()`, internamente el compilador lo traduce a algo muy similar a `Punto_calcularDistancia(p)`. Por tanto, `this` no ha desaparecido; simplemente se ha vuelto implícito. La "magia" de la POO es, en realidad, un paso automático de un puntero a la estructura como primer argumento oculto de cada método.
+
+```c
+#include <stdio.h>
+#include <math.h>
+
+// 1. Los Datos (La "Clase" sin métodos)
+typedef struct {
+    double x;
+    double y;
+} Punto;
+
+// 2. El Comportamiento (El "Método" externo)
+// Observa el primer parámetro: es el equivalente explícito a 'this'
+double calcularDistanciaOrigen(Punto *this) {
+    // En Java sería: return Math.sqrt(this.x * this.x + this.y * this.y);
+    // En C usamos el operador flecha sobre el puntero recibido
+    return sqrt((this->x * this->x) + (this->y * this->y));
+}
+
+int main() {
+    // 3. Instanciación (en el stack para simplificar)
+    Punto p;
+    
+    // 4. Estado (Inicialización manual, sin constructor)
+    p.x = 3.0;
+    p.y = 4.0;
+
+    // 5. Llamada al método
+    // En Java: p.calcularDistanciaOrigen();
+    // En C: Pasamos explícitamente la dirección de 'p' como argumento
+    double distancia = calcularDistanciaOrigen(&p);
+
+    printf("Distancia: %f\n", distancia);
+    return 0;
+}
+
+```
