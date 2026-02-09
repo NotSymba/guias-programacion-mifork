@@ -178,6 +178,13 @@ En lenguajes basados en prototipos, como JavaScript (en su modelo original) o Lu
 
 ### Respuesta  
 
+Respuesta de clase: Los objetos se almacenan en memoria en el Heap en la mayoría de lenguajes, hay otros lenguajes que permiten tambien crear objetos en el Stack. Los objetos se crean con el new.   
+Ventajas de usar el Heap:   
+-Reservo dinámicamente, el tamaño se decide en ejecución. Hace que el programa use justo lo que se va necesitar sin malgastar recursos.  
+-Lo que está en el heap, vive más alla que el método o función donde se ha creado.   
+Desventajas:   
+-Hay que liberarla cuando ya no se necesita. Se puede hacerde manera manual, pero es difícil de hacer y puede no estar claro como hacerlo. O automáticamente, por ejemplo con un "Recolector de basura". En java no es necesario usar el delete ya que lo hace ya todo el recolector de basura, pero a veces este recolector de basura pasa y no hace falta lo que consume rendimiento, puede haber veces que no sea necesario.
+
 ### 6.1. Almacenamiento de Objetos en Memoria
 
 En Java, todos los objetos se almacenan en el área de memoria dinámica conocida como **Heap** (montículo). Cuando se escribe `new Clase()`, el sistema realiza una operación equivalente a un `malloc` en C, buscando un bloque de memoria libre suficiente para alojar los atributos del objeto y devolviendo una referencia a esa dirección. Por otro lado, las variables que contienen esa referencia (los "nombres" de los objetos) se almacenan en la **Pila (Stack)**, comportándose exactamente igual que un puntero en C (`struct Tipo* puntero`).
@@ -312,6 +319,14 @@ public class Principal {
 ## 9. ¿Cuál es el punto de entrada en un programa en Java? ¿Qué es `static` y para qué vale? ¿Sólo se emplea para ese método `main`? ¿Para qué se combina con `final`?
 
 ### Respuesta  
+Respuesta de clase:
+static:   
+-Dice que el atributo o método pertenece a la clase, no a una instancia concreta.  
+-No se necesita un objeto para usarlos.   
+-No existe this.    
+-No puedo usar desde un método static nada que no sea static.   
+-No abusar!!    
+Utilizar static final se usa pra constantes como Pi.
 
 ### 9.1. El Punto de Entrada: `main`
 
@@ -363,6 +378,8 @@ Esta combinación es el reemplazo directo y seguro de las macros `#define` o de 
 ## 10. Intenta ejecutar un poco de Java de forma básica, con los comandos `javac` y `java`. ¿Cómo podemos compilar el programa y ejecutarlo desde linea de comandos? ¿Java es compilado? ¿Qué es la **máquina virtual**? ¿Qué es el *byte-code* y los ficheros `.class`?
 
 ### Respuesta  
+Respuesta de clase:   
+javac es el compilador de java y crea el archivo .class (Tiempo de compilación) y con java se lanza la aplicación (Tiempo de ejecución).
 
 ### 10.1. Compilación y Ejecución desde la Línea de Comandos
 
@@ -395,6 +412,7 @@ Su función principal es cargar los archivos `.class` y traducir las instruccion
 ## 11. En el código anterior de la clase `Punto` ¿Qué es `new`? ¿Qué es un **constructor**? Pon un ejemplo de constructor en una clase `Empleado` que tenga DNI, nombre y apellidos
 
 ### Respuesta  
+Respuesta de clase: El new reserva memoria, invoca al constructor y es una expresión(puedo asignarla a una variable, o usarla directamente en linea).
 
 ### 11.1. El operador `new`
 
@@ -443,6 +461,7 @@ class Principal {
 ## 12. ¿Qué es la referencia `this`? ¿Se llama igual en todos los lenguajes? Pon un ejemplo del uso de `this` en la clase `Punto`
 
 ### Respuesta  
+Respuesta de clase: this hacer referencia al objeto actual, sirve para desambiguar
 
 ### 12.1. Concepto y Funcionamiento
 
@@ -545,6 +564,7 @@ public class Principal {
 ## 14. El paso del `Punto` como parámetro a un método, es **por copia** o **por referencia**, es decir, si se cambia el valor de algún atributo del punto pasado como parámetro, dichos cambios afectan al objeto fuera del método? ¿Qué ocurre si en vez de un `Punto`, se recibiese un entero (`int`) y dicho entero se modificase dentro de la función? 
 
 ### Respuesta  
+Respuesta de clase: Los datos primitivos se pasar por valor(int,char,etc. siempre los que tengan minisula). Y los objetos por referencia (copia de la referencia) 
 
 ### 14.1. Paso de Objetos: Valor de la Referencia
 
