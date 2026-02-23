@@ -18,6 +18,8 @@ Por favor, escribe en impersonal las respuestas.
 
 ### Respuesta   
 
+Respuesta de clase: Encapsulación, tiene que ver con "Protección". Evita estados no validos de los objetos y evita dependencias desde fuera que no quiero. La encapsulación se puede ver como dos partes, he juntado estado y comportamiento en un artefacto(la clase), y ahora puedo ocultar ciertas partes del exterior.
+
 ### Objetivos de la Encapsulación y Ocultación
 
 El objetivo principal de la encapsulación y la ocultación de información es proteger la integridad del estado interno de un objeto, evitando que sea manipulado de forma arbitraria o inconsistente por código externo. En C, una `struct` expone todos sus miembros; cualquier función puede alterar sus valores sin control, lo que a menudo lleva a errores difíciles de rastrear si los datos quedan en un estado inválido (por ejemplo, asignar un valor negativo a una variable que representa una longitud). La POO busca restringir este acceso directo, obligando a que cualquier interacción con los datos se realice exclusivamente a través de métodos controlados (la interfaz pública), garantizando así que el objeto sea el único responsable de gestionar su propia información.
@@ -31,7 +33,9 @@ Otra ventaja fundamental es la **validación y consistencia**. Al forzar el acce
 
 ## 2. ¿Qué se entiende por la **interfaz pública** de un objeto o clase en POO? Describe brevemente cómo se relaciona con la ocultación de información.
 
-### Respuesta   
+### Respuesta  
+
+Respuestas de clase: La interfaz pública son los miembros que se ven desde fuera, es decir, los que no están ocultos.
 
 ### Definición de Interfaz Pública
 
@@ -50,6 +54,8 @@ Por tanto, la interfaz pública actúa como una frontera selectiva o un filtro. 
 
 ### Respuesta   
 
+Respuesta de clase: Hay q tener cuidado con lo que dejamos público hacia el exterior, ya que el cambio puede complicar el código si se produce una confusión. Volver atras habría que cambiar todo. Por eso si se cambi tiene más consecuencias que cualquier cambio en la parte oculta.
+
 ### Importancia del diseño de la interfaz pública
 
 La interfaz pública actúa como un contrato inmutable entre el creador de la clase y el resto del sistema que la utiliza. Al igual que en C modificar el prototipo de una función en un archivo de cabecera (`.h`) muy utilizado rompería la compilación de todos los módulos dependientes, en Java, cada método público crea una dependencia directa. Si se diseña la interfaz exponiendo detalles internos innecesarios (por ejemplo, permitiendo acceso directo a una estructura de datos interna), se pierde la capacidad de optimizar o cambiar esa estructura en el futuro sin reescribir todo el código externo que depende de ella. Por ello, se debe exponer solo lo estrictamente necesario.
@@ -62,6 +68,8 @@ Cambiar una interfaz pública ya establecida es, por lo general, difícil y cost
 ## 4. ¿Qué son las **invariantes de clase** y por qué la ocultación de información nos ayuda?
 
 ### Respuesta   
+
+Respuesta de clase: Las invariantes de clase son condiciones que los objetos de esa clase deben cumplir para ser válidos y durante toda la vida del objeto. Ejemplos: CuentaBancaria debe tener siempre saldo positivo, Persona debe tener edad >= 0, Rectangulo debe tener ancho y alto > 0.
 
 ### Definición de Invariante
 
@@ -114,6 +122,8 @@ El modificador **`private`** restringe la visibilidad del miembro exclusivamente
 
 ### Respuesta   
 
+Respuesta de clase: Public: clases, atributos y métodos. Private: clases internas, atributos y métodos.
+
 ### 1. Miembros de la Clase (Atributos y Métodos)
 
 El uso más frecuente de `public` y `private` se da en los **atributos** (variables de instancia) y los **métodos** (funciones). Al aplicarlos aquí, se define quién puede acceder a los datos o invocar el comportamiento del objeto. Esto es diferente a C++, donde los modificadores abren secciones completas (`public:` seguido de varias declaraciones); en Java, el modificador debe anteponerse explícitamente a **cada** declaración individual de atributo o método (por ejemplo, `private int x; private int y;`).
@@ -131,6 +141,8 @@ Es crucial destacar dónde **no** se pueden usar: las **variables locales**. A d
 
 ### Respuesta    
 
+Respuesta de clase: protected, solo se ve desde "subclases", se usan en herencia. "package-private"o sin modificador, solo se ve desde el paquete.
+
 Sí, la visibilidad no es un concepto binario; existe un espectro de control de acceso que permite refinar quién puede ver y modificar los componentes de una clase. Además de los extremos `public` (acceso total) y `private` (acceso restringido a la propia clase), la mayoría de los lenguajes orientados a objetos incluyen el modificador **`protected`**. Este nivel es crucial para la **herencia**: permite que las subclases (las "hijas") accedan a los miembros de la clase padre, manteniéndolos ocultos para el resto del mundo externo. Es un equilibrio entre la seguridad de `private` y la apertura de `public`.
 
 En el caso específico de **Java**, existen cuatro niveles de visibilidad. Aparte de `public`, `private` y `protected`, existe la **visibilidad por defecto** (o *package-private*), que se aplica cuando no se escribe ningún modificador. Este nivel permite el acceso a cualquier clase que resida en el mismo **paquete** (directorio lógico). Para un programador de C, esto es comparable al alcance de las variables globales estáticas dentro de un mismo archivo fuente o módulo: son visibles para todas las funciones de ese archivo, pero invisibles para otros archivos del proyecto.
@@ -141,6 +153,8 @@ En otros lenguajes, la filosofía varía. **C++** utiliza `public`, `private` y 
 ## 8. Responde: Los miembros de instancia privados de un objeto están ocultos para (a) otras clases o (b) otras instancias, aunque sean de la misma clase. Pon un ejemplo añadiendo un método `calcularDistanciaAPunto(Punto otro)` y explica la respuesta.
 
 ### Respuesta   
+
+Respuesta de clase: La opción a), está oculto para código  de otras clases.
 
 La respuesta correcta es la opción **(a): están ocultos para otras clases**. En la mayoría de los lenguajes orientados a objetos, incluido Java (y C++), los modificadores de acceso se aplican a nivel de **Clase** (el tipo de dato o molde), no a nivel de **Instancia** (el objeto individual). Esto significa que un objeto de la clase `Punto` tiene permiso total para acceder a los miembros privados de *cualquier* otro objeto que también sea de la clase `Punto`. La barrera de protección `private` se levanta contra el código externo (otras clases), pero no existe entre objetos "hermanos" del mismo tipo.
 
@@ -178,6 +192,8 @@ public class Punto {
 
 ### Respuesta   
 
+Respuesta de clase: "getter" y "setter" permiten dar acceso a atributos privados para obtener su valor o cambiarlo.
+
 ### Definición y Función como Intermediarios
 
 Los métodos "getter" (accesores) y "setter" (mutadores) son funciones públicas diseñadas para leer y modificar, respectivamente, los valores de los atributos privados de una clase. En C, lo habitual es acceder directamente a los campos de una estructura (`variable.campo`). En la orientación a objetos, estos métodos actúan como una capa de intermediación obligatoria: el *getter* recupera el dato y lo devuelve al llamante, mientras que el *setter* recibe un nuevo valor y lo asigna al atributo interno.
@@ -195,6 +211,8 @@ Además, el uso de *getters* y *setters* permite desacoplar la representación i
 
 ### Respuesta   
 
+Respuesta de clase: No, esto no es cibeseguridad, es facilitar una programación con menos bugs.
+
 No, el término "seguridad" en el contexto de la encapsulación no se refiere a la protección contra ataques informáticos, hackers o robo de datos (ciberseguridad). Se refiere a la **seguridad lógica** y a la **integridad** del funcionamiento del programa. En C, es común cometer errores donde se asignan valores incoherentes a una estructura (por ejemplo, un denominador igual a cero o un puntero nulo no verificado), lo que provoca comportamientos indefinidos o fallos de segmentación (*segmentation faults*) durante la ejecución.
 
 La encapsulación protege al código de su propio desarrollador y de otros programadores que utilicen la clase. Al ocultar los datos, se evita que se modifiquen accidentalmente de manera incorrecta, garantizando que el objeto siempre se mantenga en un estado válido. Es un mecanismo de defensa contra el uso inadecuado de la memoria y la lógica del programa, asegurando que las "invariantes" (las reglas que definen qué datos son válidos) nunca se rompan, reduciendo drásticamente la cantidad de *bugs* producidos por efectos colaterales imprevistos.
@@ -205,6 +223,8 @@ Sin embargo, es importante destacar que los modificadores `private` no detendrá
 ## 11. ¿Qué diferencia hay entre **miembro de instancia** y **miembro de clase**? ¿Los miembros de clase también se pueden ocultar?
 
 ### Respuesta   
+
+Respuesta de clase: Miembro de clase: no asociado a ninguna instancia; es compartido por todas las instancias. En métodos no hay this. Miembro de instancia: está asociado a cada instancia; no son compartidos.
 
 ### Diferencia entre Miembro de Instancia y de Clase
 
@@ -222,6 +242,8 @@ Desde la perspectiva de C, un miembro `private static` es funcionalmente equival
 ## 12. Brevemente: ¿Tiene sentido que los constructores sean privados?
 
 ### Respuesta    
+
+Respuesta de clase: A veces: Un constructor auxiliar oculto(que se llama desde otros constructores públicos), cuando prefiero usar métodos factoría, cuando quiero controlar el número de instancias
 
 Sí, tiene mucho sentido y es una práctica arquitectónica muy común en el diseño de software orientado a objetos. Declarar un constructor como `private` impide que cualquier código externo a la clase pueda utilizar el operador `new` para instanciarla. Desde la perspectiva de la programación en C, esto sería equivalente a definir un tipo `struct` pero ocultar deliberadamente la función encargada de invocar a `malloc`, bloqueando así la creación de la estructura desde módulos externos.
 
@@ -254,6 +276,8 @@ public class GestorConfiguracion {
 ## 13. ¿Cómo se indican los **miembros de clase** en Java? Pon un ejemplo, en la clase `Punto` definida anteriormente, para que incluya miembros de clase que permitan saber cuáles son los valores `x` e `y` máximos que se han establecido en todos los puntos que se hayan creado hasta el momento.
 
 ### Respuesta   
+
+Respuesta de clase: con static cualquier miembro pasa a ser miembro de esa clase.
 
 ### Declaración de Miembros de Clase
 
@@ -326,6 +350,8 @@ public class Principal {
 
 ### Respuesta   
 
+Respuesta de clase: 
+
 ```java
 public static Punto crearPuntoRedondeado(double x, double y) {
     double xRedondeado = Math.round(x);
@@ -388,6 +414,8 @@ public class Punto {
 
 ### Respuesta    
 
+Respuesta de clase: Para poder garantizar la invariante de clase. La convencion: es atributos siempre privados y emplear metodos de acceso para poder tener un acceso controlado. Para poder cambiar la representación interna.
+
 La convención más extendida y recomendada en la Programación Orientada a Objetos es declarar siempre los atributos como `private`, incluso si se van a proporcionar métodos *getter* y *setter* públicos para todos ellos. Aunque a simple vista parezca redundante, existe una diferencia arquitectónica fundamental respecto a dejar el atributo `public` (como el comportamiento por defecto de los campos en una `struct` de C). Al exponer directamente una variable, se pierde por completo el control sobre quién y cuándo accede a ella, imposibilitando la intercepción de estas operaciones. Los métodos de acceso actúan como una frontera o capa de intermediación obligatoria entre el mundo exterior y los datos internos.
 
 Esta práctica está íntimamente ligada a la preservación de las **invariantes de clase**. Una invariante es una regla lógica que define la validez del estado de un objeto. Si un atributo es público, cualquier código externo podría asignarle un valor que corrompa dicho estado (por ejemplo, asignar una longitud negativa o un puntero nulo no esperado). Al utilizar un *setter*, se proporciona un embudo o punto de control centralizado donde se pueden evaluar condicionales (`if`) para validar los datos antes de escribirlos en la memoria del objeto. Si el dato rompe la invariante, el *setter* puede rechazar la operación o lanzar un error, garantizando que la instancia nunca adquiera un estado inconsistente.
@@ -398,6 +426,8 @@ Además de la seguridad lógica, mantener los atributos privados mediante *gette
 ## 17. ¿Qué significa que una clase sea **inmutable**? ¿qué es un método modificador? ¿Un método modificador es siempre un "setter"? ¿Tiene ventajas que una clase sea inmutable?
 
 ### Respuesta    
+
+Respuesta de clase: Inmutable: su estado no cambia. Modificador: cualquier método que cambia el estado interno, por ejemplo: un setter. Las clases inmutables tienen ventajas: no hacer clases mutables por defecto, como primera opción.
 
 Una clase es **inmutable** cuando el estado de sus objetos (el valor de sus atributos) no puede ser modificado en ningún momento tras su creación e inicialización. Desde la perspectiva de C, se asemeja a declarar una variable de tipo `struct` acompañada del calificador `const` tras haberle asignado sus valores iniciales: se permite la lectura de sus campos, pero cualquier intento de sobrescribir esa región de memoria es bloqueado. En Java, esto se logra habitualmente declarando todos los atributos como `private` y `final` (el equivalente más cercano a `const` para variables), y omitiendo de la interfaz pública cualquier método que ofrezca la posibilidad de alterar dichos datos una vez que el constructor ha terminado de ejecutarse.
 
@@ -437,6 +467,8 @@ public class PuntoInmutable {
 
 ### Respuesta    
 
+Respuesta de clase: No por convencion no, si no hariamos clases inmutables.
+
 No, no es recomendable incluir métodos *setter* sistemáticamente ni por convención para todos los atributos de una clase. Hacerlo genera una falsa ilusión de encapsulación: si todo atributo privado posee un *getter* y un *setter* públicos que simplemente leen y asignan el valor sin lógica adicional, la clase se vuelve funcionalmente equivalente a una `struct` pública tradicional en C. El estado interno queda expuesto a manipulaciones arbitrarias desde cualquier parte del programa, anulando el principio fundamental de ocultar y proteger los detalles de implementación.
 
 En el diseño riguroso orientado a objetos, es preferible exponer **comportamiento** en lugar de exponer memoria directa. En vez de proporcionar un *setter* genérico que permita sobrescribir una variable, se recomienda diseñar métodos que representen acciones o procesos reales. Por ejemplo, en una clase que represente una cuenta bancaria, proporcionar un `setSaldo(double nuevoSaldo)` es arquitectónicamente peligroso; la aproximación correcta es ofrecer métodos funcionales como `depositar(double cantidad)` o `retirar(double cantidad)`. De esta forma, el objeto mantiene el control absoluto sobre cómo evoluciona su estado interno y se garantiza el cumplimiento de las invariantes.
@@ -447,6 +479,8 @@ Además, la generación automática de *setters* atenta contra la inmutabilidad 
 ## 19. ¿La clase `String` en Java es mutable o inmutable? ¿Qué ocurre al concatenar dos cadenas? ¿Qué debemos hacer si vamos a hacer una operación que implique concatenar muchas veces para construir paso a paso una cadena muy larga?
 
 ### Respuesta    
+
+Respuesta de clase: la clases String es inmutable.
 
 ### La Inmutabilidad de `String`
 
