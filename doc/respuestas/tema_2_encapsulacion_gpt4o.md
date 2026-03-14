@@ -516,6 +516,8 @@ public static String construirTextoLargo(int iteraciones) {
 
 ### Respuesta    
 
+Respuesta de clase: Puede ser por identidad(mismo objeto en memoria) se utiliza con ==, o por contenido(mismo estado/valor de sus atributos). El metodo equals esta pensado para que se haga una comparación por contenido, pero tenemos que veficar que es por contenido esto se usa en la comparación por contenido. El metodo equals por defecto hace comparación por identidad (==), excepto en clases concretas donde se implementa una comparación por contenido, p.ej en String.
+
 En la Programación Orientada a Objetos, la comparación de dos instancias puede realizarse bajo dos enfoques: por su **identidad** o por su **contenido**. La comparación por identidad verifica si dos variables apuntan exactamente a la misma ubicación de memoria en el *heap*; en C, esto es equivalente a evaluar si dos punteros almacenan la misma dirección (`puntero1 == puntero2`). Por otro lado, la comparación por contenido evalúa si los atributos internos de dos objetos ubicados en distintas posiciones de memoria poseen los mismos valores (similar a comparar manualmente campo por campo dos estructuras `struct` independientes). En Java, el operador relacional `==` se emplea exclusivamente para comparar la identidad (las referencias) cuando se aplica a objetos.
 
 Para realizar comparaciones basadas en el contenido, Java proporciona el método **`equals()`**, el cual es heredado por todas las clases desde la superclase cósmica `Object`. Sin embargo, el comportamiento por defecto de este método base es idéntico al del operador `==`: únicamente compara las direcciones de memoria. Para que `equals()` compare verdaderamente el estado interno (por ejemplo, verificar si dos instancias distintas de `Punto` comparten las mismas coordenadas `x` e `y`), es indispensable que el desarrollador sobrescriba (redefina) este método dentro de su clase, estableciendo explícitamente la lógica de comparación campo por campo.
@@ -547,6 +549,8 @@ public class ComparacionEjemplo {
 ## 21. ¿Qué son las clases "wrapper" en un lenguaje de programación orientado a objetos? ¿Cómo se hace? ¿Es un proceso automático? ¿Qué ventajas tienen? ¿Todos los lenguajes orientados a objetos tienen tipos primitivos y necesitan wrappers? 
 
 ### Respuesta    
+
+Respuesta de clase: Los wrapper ocurren en lenguajes que tienen tipos primitivos, p.ej Java. Otros lenguajes no tienen tipos primitios, como Python. Para el tipo primitivo int tenemos Integer, para cada primitivo tenemos una clase que los puede manejar(floar -> Float, char -> Character). Nos pueden servir para añadirle comportamiento, para usarlos en contextos donde se necesitan objetos (List<T>). En java tenemos la conversión automática de una lado a otro (Autoboxing/Unboxing).
 
 ### El Concepto de Clase Envoltorio (Wrapper)
 
@@ -586,6 +590,8 @@ public class EjemploWrappers {
 ## 22. ¿En POO qué es un **tipo de dato enumerado**? ¿En Java, un tipo de dato enumerado es una clase? ¿Qué ventajas tienen en términos de encapsulación los enumerados en Java?
 
 ### Respuesta   
+
+Respuesta de clase: Un enumerado es un tipo con un número determinado de valores posibles, en Java un enumerado es una clase, cuyas instancias son finitas, conocidas de antemano y tienen un nombre cada una (valor del enumerado)
 
 ### Definición de Tipo Enumerado
 

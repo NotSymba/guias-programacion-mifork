@@ -82,6 +82,8 @@ int main() {
 
 ### Respuesta    
 
+Respuesta de clase: Las excepciones surgen en situaciones atípicas, cuando implementamos funciones nos permite indicar más claramente el error y cuando llamamos facilitan separar la lógica normal de la de reacción o manejo de la situación errónea.
+
 ### Concepto y Objetivos de las Excepciones
 
 Una **excepción** se define como un evento anómalo que ocurre durante la ejecución de un programa e interrumpe su flujo normal de instrucciones. En contraste con lenguajes como C, donde los fallos se gestionan mediante códigos de retorno numéricos o indicadores globales, en lenguajes orientados a objetos como Java, una excepción es un *objeto* real instanciado a partir de una clase específica. Este objeto encapsula toda la información fundamental sobre el error, tal como el tipo de fallo ocurrido, un mensaje descriptivo y la secuencia de llamadas a métodos (traza de la pila) que condujeron a dicho problema.
@@ -304,6 +306,8 @@ public class Calculadora {
 ## 7. En relación con las ventajas de la encapsulación, comparando el ejemplo en C con Java. ¿Qué **información esencial** lleva cualquier **objeto excepción** que es muy útil tener cuando se llega a un manejador?
 
 ### Respuesta    
+
+Respuesta de clase: Un mensaje(getMessage()), la traza de la pila(getStackTrace o printStackTrace) y opcionalmente la "Causa" es otra excepcion que es la verdadera causa
 
 ### Información Esencial en los Objetos de Excepción
 
